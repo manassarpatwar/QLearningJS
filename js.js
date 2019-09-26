@@ -1,9 +1,10 @@
 var canvas = document.getElementById("canvas");
+var actionSpan = document.getElementById("actionSpan");
 var context = canvas.getContext("2d");
 var w = 0;
 var h = 0;
 
-let canvasFactor = 1;
+let canvasFactor = 2;
 
 function resizeCanvas(width, height) {
     canvas.width = width * canvasFactor;
@@ -14,7 +15,7 @@ function resizeCanvas(width, height) {
     canvas.style.height = h / canvasFactor + "px";
     context.translate(w / 2, h / 2);
 };
-resizeCanvas(600, 400);
+resizeCanvas(400, 400);
 
 function Vector(x, y) {
     this.x = x;
@@ -74,9 +75,11 @@ class QLearning {
             action = this.q_table[this.state].reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
         else
             action = Math.floor(Math.random() * this.actions.length);
-        console.log(this.actions[action])
+//        console.log(this.actions[action])
+        actionSpan.innerHTML = "";
+        actionSpan.insertAdjacentHTML('beforeend', this.actions[action]);
         let newEnv = this.move(this.actions[action]);
-        if(newEnv){
+        if (newEnv) {
             let newState = newEnv.newState;
             let reward = newEnv.reward;
 
@@ -88,7 +91,7 @@ class QLearning {
         }
         this.setup();
         this.steps++;
-        if(this.steps > this.max_steps_per_episode)
+        if (this.steps > this.max_steps_per_episode)
             this.reset();
 
     }
@@ -138,7 +141,7 @@ class QLearning {
 
         }
 
-        context.lineWidth = 2;
+        context.lineWidth = 2 * canvasFactor;
         context.strokeStyle = 'rgba(255,255,255,0.7)';;
         context.stroke();
 
@@ -248,14 +251,14 @@ class QLearning {
     }
 
     drawText(data, x, y) {
-        context.font = "15px Arial";
+        context.font = 12 * canvasFactor + "px Arial";
         context.fillStyle = "black";
         context.fillText(data, x, y);
     }
 
     drawPlayer(x, y) {
         context.beginPath()
-        context.arc(x, y, 15, 0, Math.PI * 2);
+        context.arc(x, y, 15 * canvasFactor, 0, Math.PI * 2);
         context.fillStyle = "blue";
         context.fill();
     }
@@ -264,7 +267,7 @@ class QLearning {
 
 let options = {
     num_eps: 100,
-    max_steps_per_episode: 100,
+    max_steps_per_episode: 10,
     learning_rate: 0.1,
     discount_rate: 0.99,
     exploration_rate: 1,
@@ -277,40 +280,20 @@ let q = new QLearning(options)
 
 let speed = 1;
 let requestId;
-function update(){
+
+function update() {
     q.step();
     requestId = window.requestAnimationFrame(update);
 }
 
-function stop(){
+function stop() {
     window.cancelAnimationFrame(requestId);
 }
 
-function start(){
+function start() {
     update();
 }
 
-document.addEventListener("keydown", function (e) {
-    e = e || window.event;
-
-    switch (e.keyCode) {
-        case 38:
-            q.move("up")
-            break;
-        case 40:
-            q.move("down")
-            break;
-        case 37:
-            q.move("left")
-            break;
-        case 39:
-            q.move("right")
-            break;
-        case 32:
-            q.reset()
-            break;
-        case 83:
-            q.step()
-            break;
-    }
-});
+function step() {
+    q.step();
+}
