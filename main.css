@@ -19,7 +19,7 @@ button {
     padding: 20px 30px;
     font-size: 20px;
     color: rgba(0, 10, 10, 0.8);
-    box-shadow: rgba(30, 22, 54, 0.4) 0 0px 0px 2px inset;
+    box-shadow: rgba(255, 255, 255, 0.4) 0 0px 0px 2px inset;
 }
 
 button:hover {
