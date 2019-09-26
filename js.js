@@ -142,17 +142,17 @@ class QLearning {
         }
 
         context.lineWidth = 2 * canvasFactor;
-        context.strokeStyle = 'rgba(255,255,255,0.7)';;
+        context.strokeStyle = 'rgba(255,255,255,0.7)';
         context.stroke();
 
         context.beginPath();
         context.rect(this.goal.x - w / 8, this.goal.y - h / 8, w / 4, h / 4)
-        context.fillStyle = "green";
+        context.fillStyle = 'rgba(65,190,70,1)'
         context.fill();
 
         context.beginPath();
         context.rect(this.end.x - w / 8, this.end.y - h / 8, w / 4, h / 4)
-        context.fillStyle = "red";
+        context.fillStyle = 'rgba(230,73,25,1)';
         context.fill();
 
         for (let block of this.blocks) {
@@ -251,7 +251,7 @@ class QLearning {
     }
 
     drawText(data, x, y) {
-        context.font = 12 * canvasFactor + "px Arial";
+        context.font = 10 * canvasFactor + "px Arial";
         context.fillStyle = "black";
         context.fillText(data, x, y);
     }
