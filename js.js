@@ -39,6 +39,11 @@ class QLearning {
 
         this.actions = ["up", "right", "down", "left"];
 
+        this.counter = {
+            numGoal: 0,
+            numEnd: 0
+        };
+
         this.blocks = [new Vector(-w / 4, 0), new Vector(-w / 4, -h / 4)];
         this.q_table = new Array(16);
         for (let i = 0; i < 16; i++) {
@@ -75,7 +80,7 @@ class QLearning {
             action = this.q_table[this.state].reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
         else
             action = Math.floor(Math.random() * this.actions.length);
-//        console.log(this.actions[action])
+        //        console.log(this.actions[action])
         actionSpan.innerHTML = "";
         actionSpan.insertAdjacentHTML('beforeend', this.actions[action]);
         let newEnv = this.move(this.actions[action]);
@@ -150,10 +155,18 @@ class QLearning {
         context.fillStyle = 'rgba(65,190,70,1)'
         context.fill();
 
+        context.font = 30 * canvasFactor + "px Arial";
+        context.fillStyle = "green";
+        context.fillText(this.counter.numGoal, this.goal.x - w / 16, this.goal.y + h / 64);
+
         context.beginPath();
         context.rect(this.end.x - w / 8, this.end.y - h / 8, w / 4, h / 4)
         context.fillStyle = 'rgba(230,73,25,1)';
         context.fill();
+
+        context.font = 30 * canvasFactor + "px Arial";
+        context.fillStyle = 'rgba(141,2,31,1)';
+        context.fillText(this.counter.numEnd, this.end.x - w / 16, this.end.y + h / 64);
 
         for (let block of this.blocks) {
             context.beginPath();
@@ -209,11 +222,13 @@ class QLearning {
             case this.getState(this.goal.x, this.goal.y):
                 console.log("goal")
                 reward += 1;
+                this.counter.numGoal++;
                 this.done = true;
                 break;
             case this.getState(this.end.x, this.end.y):
                 console.log("end")
                 reward -= 1;
+                this.counter.numEnd++;
                 this.done = true;
                 break;
         }
@@ -243,10 +258,60 @@ class QLearning {
                 hCounter++;
             }
 
-            this.drawText(this.q_table[i][0], -3 * w / 8 + widthOffset - 3 * w / 128, -3 * h / 8 + heightOffset - h / 16 - 3 * h / 256)
-            this.drawText(this.q_table[i][1], -3 * w / 8 + widthOffset + w / 16, -3 * h / 8 + heightOffset)
-            this.drawText(this.q_table[i][2], -3 * w / 8 + widthOffset - 3 * w / 128, -3 * h / 8 + heightOffset + h / 16 + 3 * h / 128)
-            this.drawText(this.q_table[i][3], -3 * w / 8 + widthOffset - w / 16 - 3 * w / 64, -3 * h / 8 + heightOffset)
+            let up = this.q_table[i][0];
+            let right = this.q_table[i][1];
+            let left = this.q_table[i][2];
+            let down = this.q_table[i][3];
+
+            //Up
+            context.beginPath();
+            context.moveTo(-3 * w / 8 + widthOffset, -3 * h / 8 + heightOffset);
+            context.lineTo(-3 * w / 8 + widthOffset + w / 8, -3 * h / 8 + heightOffset - h / 8);
+            context.lineTo(-3 * w / 8 + widthOffset - w / 8, -3 * h / 8 + heightOffset - h / 8);
+            if (up > 0) {
+                context.fillStyle = "rgba(65,190,70, " + Math.abs(up) + ")";
+            } else
+                context.fillStyle = "rgba(230,73,25, " + Math.abs(up) + ")";
+            context.fill();
+
+            //Right
+            context.beginPath();
+            context.moveTo(-3 * w / 8 + widthOffset, -3 * h / 8 + heightOffset);
+            context.lineTo(-3 * w / 8 + widthOffset + w / 8, -3 * h / 8 + heightOffset - h / 8);
+            context.lineTo(-3 * w / 8 + widthOffset + w / 8, -3 * h / 8 + heightOffset + h / 8);
+            if (right > 0) {
+                context.fillStyle = "rgba(65,190,70, " + Math.abs(right) + ")";
+            } else
+                context.fillStyle = "rgba(230,73,25, " + Math.abs(right) + ")";
+            context.fill();
+
+            //Down
+            context.beginPath();
+            context.moveTo(-3 * w / 8 + widthOffset, -3 * h / 8 + heightOffset);
+            context.lineTo(-3 * w / 8 + widthOffset + w / 8, -3 * h / 8 + heightOffset + h / 8);
+            context.lineTo(-3 * w / 8 + widthOffset - w / 8, -3 * h / 8 + heightOffset + h / 8);
+            if (down > 0) {
+                context.fillStyle = "rgba(65,190,70, " + Math.abs(down) + ")";
+            } else
+                context.fillStyle = "rgba(230,73,25, " + Math.abs(down) + ")";
+            context.fill();
+
+            //Left
+            context.beginPath();
+            context.moveTo(-3 * w / 8 + widthOffset, -3 * h / 8 + heightOffset);
+            context.lineTo(-3 * w / 8 + widthOffset - w / 8, -3 * h / 8 + heightOffset + h / 8);
+            context.lineTo(-3 * w / 8 + widthOffset - w / 8, -3 * h / 8 + heightOffset - h / 8);
+            if (left > 0) {
+                context.fillStyle = "rgba(65,190,70, " + Math.abs(left) + ")";
+            } else
+                context.fillStyle = "rgba(230,73,25, " + Math.abs(left) + ")";
+            context.fill();
+
+            this.drawText(up, -3 * w / 8 + widthOffset - 3 * w / 128, -3 * h / 8 + heightOffset - h / 16 - 3 * h / 256)
+            this.drawText(right, -3 * w / 8 + widthOffset + w / 16, -3 * h / 8 + heightOffset)
+            this.drawText(down, -3 * w / 8 + widthOffset - 3 * w / 128, -3 * h / 8 + heightOffset + h / 16 + 3 * h / 128)
+            this.drawText(left, -3 * w / 8 + widthOffset - w / 16 - 3 * w / 64, -3 * h / 8 + heightOffset)
+
         }
     }
 
@@ -259,7 +324,7 @@ class QLearning {
     drawPlayer(x, y) {
         context.beginPath()
         context.arc(x, y, 15 * canvasFactor, 0, Math.PI * 2);
-        context.fillStyle = "blue";
+        context.fillStyle = "rgba(0,127,255,1)";
         context.fill();
     }
 
