@@ -260,8 +260,8 @@ class QLearning {
 
             let up = this.q_table[i][0];
             let right = this.q_table[i][1];
-            let left = this.q_table[i][2];
-            let down = this.q_table[i][3];
+            let down = this.q_table[i][2];
+            let left = this.q_table[i][3];
 
             //Up
             context.beginPath();
