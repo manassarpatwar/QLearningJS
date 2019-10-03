@@ -1,8 +1,12 @@
 var canvas = document.getElementById("canvas");
 var actionSpan = document.getElementById("actionSpan");
+var episodesSpan = document.getElementById("episodesSpan");
 var context = canvas.getContext("2d");
 var w = 0;
 var h = 0;
+
+var numCols = 4;
+var numRows = 4;
 
 let canvasFactor = 2;
 
@@ -15,7 +19,7 @@ function resizeCanvas(width, height) {
     canvas.style.height = h / canvasFactor + "px";
     context.translate(w / 2, h / 2);
 };
-resizeCanvas(400, 400);
+resizeCanvas(numCols * 100, numRows * 100);
 
 function Vector(x, y) {
     this.x = x;
@@ -44,32 +48,42 @@ class QLearning {
             numEnd: 0
         };
 
-        this.blocks = [new Vector(-w / 4, 0), new Vector(-w / 4, -h / 4)];
-        this.q_table = new Array(16);
-        for (let i = 0; i < 16; i++) {
-            this.q_table[i] = new Array(4);
+        this.q_table = new Array(numCols * numRows);
+        for (let i = 0; i < numCols * numRows; i++) {
+            this.q_table[i] = new Array(this.actions.length);
             for (let j = 0; j < 4; j++) {
                 this.q_table[i][j] = 0;
             }
         }
-        this.playerStart = new Vector(-3 * w / 8, 3 * h / 8);
-        this.playerPos = new Vector(-3 * w / 8, 3 * h / 8);
-        this.goal = new Vector(3 * w / 8, -3 * h / 8)
-        this.end = new Vector(3 * w / 8, -h / 8)
+        this.playerStart = new Vector(-(numCols - 1) * w / (numCols * 2), (numRows - 1) * h / (numRows * 2));
+        this.playerPos = new Vector(-(numCols - 1) * w / (numCols * 2), (numRows - 1) * h / (numRows * 2));
+        this.goal = new Vector((numCols - 1) * w / (numCols * 2), -(numRows - 1) * h / (numRows * 2))
+        this.end = new Vector((numCols - 1) * w / (numCols * 2), -(numRows - 3) * h / (numRows * 2))
         this.episode = 0;
-        this.reset();
-    }
 
-    learn() {
-        for (let i = 0; i < this.num_eps; i++) {
-            let state = this.reset();
-            for (let j = 0; j < this.max_steps_per_episode; j++) {
-                this.step();
-                if (this.done)
-                    break;
+        //Blocks
+        this.blocks = [];
+        while (this.blocks.length < Math.max(numCols, numRows) - 1) {
+            let randX = -w / 2 + Math.floor(Math.random() * numCols) * w / numCols;
+            let randY = -h / 2 + Math.floor(Math.random() * numRows) * h / numRows;
+
+            if ((randX + w / (2 * numCols) != this.playerStart.x || randY + h / (2 * numRows) != this.playerStart.y) &&
+                (randX + w / (2 * numCols) != this.goal.x || randY + h / (2 * numRows) != this.goal.y) &&
+                (randX + w / (2 * numCols) != this.end.x || randY + h / (2 * numRows) != this.end.y)) {
+                let newValues = true;
+                for (let i = 0; i < this.blocks.length; i++) {
+                    if (randX == this.blocks[i].x && randY == this.blocks[i].y) {
+                        newValues = false;
+                        break;
+                    }
+                }
+                if (newValues)
+                    this.blocks.push(new Vector(randX, randY));
             }
-            this.exploration_rate = this.min_exploration_rate + (this.max_exploration_rate - this.min_exploration_rate) * Math.exp(-this.exploration_decay_rate * i);
+
         }
+
+        this.reset();
     }
 
     step() {
@@ -94,10 +108,11 @@ class QLearning {
             this.q_table[this.state][action] = Math.floor(this.q_table[this.state][action] * 100) / 100
             this.state = newState;
         }
-        this.setup();
         this.steps++;
-        if (this.steps > this.max_steps_per_episode)
+        if (this.steps > this.max_steps_per_episode){
+            this.episode++;
             this.reset();
+        }
 
     }
 
@@ -120,30 +135,28 @@ class QLearning {
     drawEnvironment() {
         context.beginPath();
         //Vertical lines
-        for (let i = 0; i < 5; i++) {
-            context.moveTo(-w / 2 + i * w / 4, -h / 2);
-            context.lineTo(-w / 2 + i * w / 4, h / 2);
+        for (let i = 1; i < numCols; i++) {
+            context.moveTo(-w / 2 + i * w / numCols, -h / 2);
+            context.lineTo(-w / 2 + i * w / numCols, h / 2);
 
         }
 
         //Horizontal lines
-        for (let i = 0; i < 4; i++) {
-            context.moveTo(-w / 2, -h / 2 + i * h / 4);
-            context.lineTo(w / 2, -h / 2 + i * h / 4);
+        for (let i = 1; i < numRows; i++) {
+            context.moveTo(-w / 2, -h / 2 + i * h / numRows);
+            context.lineTo(w / 2, -h / 2 + i * h / numRows);
 
         }
 
         //Diagonal lines
-        for (let i = 0; i < 7; i++) {
-            context.moveTo(-w / 2, h / 4 - h / 4 * i);
-            context.lineTo(-w / 4 + w / 4 * i, h / 2);
+        for (let j = 0; j < numRows; j++) {
+            for (let i = 0; i < numCols; i++) {
+                context.moveTo(-w / 2 + i * w / numCols, -h / 2 + j * h / numRows);
+                context.lineTo(-w / 2 + (i + 1) * w / numCols, -h / 2 + (j + 1) * h / numRows);
 
-        }
-
-        for (let i = 0; i < 7; i++) {
-            context.moveTo(w / 2, h / 4 - h / 4 * i);
-            context.lineTo(w / 4 - w / 4 * i, h / 2);
-
+                context.moveTo(-w / 2 + i * w / numCols, -h / 2 + (j + 1) * h / numRows);
+                context.lineTo(-w / 2 + (i + 1) * w / numCols, -h / 2 + j * h / numRows);
+            }
         }
 
         context.lineWidth = 2 * canvasFactor;
@@ -151,26 +164,26 @@ class QLearning {
         context.stroke();
 
         context.beginPath();
-        context.rect(this.goal.x - w / 8, this.goal.y - h / 8, w / 4, h / 4)
+        context.rect(this.goal.x - w / (numCols * 2), this.goal.y - h / (numRows * 2), w / numCols, h / numRows)
         context.fillStyle = 'rgba(65,190,70,1)'
         context.fill();
 
         context.font = 30 * canvasFactor + "px Arial";
         context.fillStyle = "green";
-        context.fillText(this.counter.numGoal, this.goal.x - w / 16, this.goal.y + h / 64);
+        context.fillText(this.counter.numGoal, this.goal.x - w / (numCols * 4), this.goal.y + h / (numRows * 16));
 
         context.beginPath();
-        context.rect(this.end.x - w / 8, this.end.y - h / 8, w / 4, h / 4)
+        context.rect(this.end.x - w / (numCols * 2), this.end.y - h / (numRows * 2), w / numCols, h / numRows)
         context.fillStyle = 'rgba(230,73,25,1)';
         context.fill();
 
         context.font = 30 * canvasFactor + "px Arial";
         context.fillStyle = 'rgba(141,2,31,1)';
-        context.fillText(this.counter.numEnd, this.end.x - w / 16, this.end.y + h / 64);
+        context.fillText(this.counter.numEnd, this.end.x - w / (numCols * 4), this.end.y + h / (numRows * 16));
 
         for (let block of this.blocks) {
             context.beginPath();
-            context.rect(block.x, block.y, w / 4, h / 4)
+            context.rect(block.x, block.y, w / numCols, h / numRows)
             context.fillStyle = "black";
             context.fill();
         }
@@ -189,16 +202,16 @@ class QLearning {
         }
         switch (dir) {
             case "up":
-                newY -= h / 4;
+                newY -= h / numRows;
                 break;
             case "down":
-                newY += h / 4;
+                newY += h / numRows;
                 break;
             case "left":
-                newX -= w / 4;
+                newX -= w / numCols;
                 break;
             case "right":
-                newX += w / 4;
+                newX += w / numCols;
                 break;
             default:
                 break;
@@ -206,7 +219,7 @@ class QLearning {
         if (newX > -w / 2 && newX < w / 2 && newY < h / 2 && newY > -h / 2) {
             let onBlock = false;
             for (let block of this.blocks) {
-                if (newX == block.x + w / 8 && newY == block.y + h / 8) {
+                if (newX == block.x + w / (2 * numCols) && newY == block.y + h / (2 * numRows)) {
                     onBlock = true;
                     break;
                 }
@@ -243,17 +256,17 @@ class QLearning {
     }
 
     getState(x, y) {
-        return ((y + 3 * h / 8) / (h / 4) * 4 + (x + 3 * w / 8) / (w / 4))
+        return ((y + (numRows - 1) * h / (2 * numRows)) / (h / numRows) * numCols + (x + (numCols - 1) * w / (numCols * 2)) / (w / numCols))
     }
 
     drawQValues() {
         let wCounter = 0;
         let hCounter = 0;
-        for (let i = 0; i < 16; i++) {
-            let widthOffset = wCounter * w / 4;
-            let heightOffset = hCounter * h / 4;
+        for (let i = 0; i < numRows * numCols; i++) {
+            let widthOffset = wCounter * w / numCols;
+            let heightOffset = hCounter * h / numRows;
             wCounter++;
-            if ((i + 1) % 4 == 0) {
+            if ((i + 1) % numCols == 0) {
                 wCounter = 0
                 hCounter++;
             }
@@ -265,9 +278,9 @@ class QLearning {
 
             //Up
             context.beginPath();
-            context.moveTo(-3 * w / 8 + widthOffset, -3 * h / 8 + heightOffset);
-            context.lineTo(-3 * w / 8 + widthOffset + w / 8, -3 * h / 8 + heightOffset - h / 8);
-            context.lineTo(-3 * w / 8 + widthOffset - w / 8, -3 * h / 8 + heightOffset - h / 8);
+            context.moveTo(-(numCols - 1) * w / (numCols * 2) + widthOffset, -(numRows - 1) * h / (numRows * 2) + heightOffset);
+            context.lineTo(-(numCols - 1) * w / (numCols * 2) + widthOffset + w / (numCols * 2), -(numRows - 1) * h / (numRows * 2) + heightOffset - h / (numRows * 2));
+            context.lineTo(-(numCols - 1) * w / (numCols * 2) + widthOffset - w / (numCols * 2), -(numRows - 1) * h / (numRows * 2) + heightOffset - h / (numRows * 2));
             if (up > 0) {
                 context.fillStyle = "rgba(65,190,70, " + Math.abs(up) + ")";
             } else
@@ -276,9 +289,9 @@ class QLearning {
 
             //Right
             context.beginPath();
-            context.moveTo(-3 * w / 8 + widthOffset, -3 * h / 8 + heightOffset);
-            context.lineTo(-3 * w / 8 + widthOffset + w / 8, -3 * h / 8 + heightOffset - h / 8);
-            context.lineTo(-3 * w / 8 + widthOffset + w / 8, -3 * h / 8 + heightOffset + h / 8);
+            context.moveTo(-(numCols - 1) * w / (numCols * 2) + widthOffset, -(numRows - 1) * h / (numRows * 2) + heightOffset);
+            context.lineTo(-(numCols - 1) * w / (numCols * 2) + widthOffset + w / (numCols * 2), -(numRows - 1) * h / (numRows * 2) + heightOffset - h / (numRows * 2));
+            context.lineTo(-(numCols - 1) * w / (numCols * 2) + widthOffset + w / (numCols * 2), -(numRows - 1) * h / (numRows * 2) + heightOffset + h / (numRows * 2));
             if (right > 0) {
                 context.fillStyle = "rgba(65,190,70, " + Math.abs(right) + ")";
             } else
@@ -287,9 +300,9 @@ class QLearning {
 
             //Down
             context.beginPath();
-            context.moveTo(-3 * w / 8 + widthOffset, -3 * h / 8 + heightOffset);
-            context.lineTo(-3 * w / 8 + widthOffset + w / 8, -3 * h / 8 + heightOffset + h / 8);
-            context.lineTo(-3 * w / 8 + widthOffset - w / 8, -3 * h / 8 + heightOffset + h / 8);
+            context.moveTo(-(numCols - 1) * w / (numCols * 2) + widthOffset, -(numRows - 1) * h / (numRows * 2) + heightOffset);
+            context.lineTo(-(numCols - 1) * w / (numCols * 2) + widthOffset + w / (numCols * 2), -(numRows - 1) * h / (numRows * 2) + heightOffset + h / (numRows * 2));
+            context.lineTo(-(numCols - 1) * w / (numCols * 2) + widthOffset - w / (numCols * 2), -(numRows - 1) * h / (numRows * 2) + heightOffset + h / (numRows * 2));
             if (down > 0) {
                 context.fillStyle = "rgba(65,190,70, " + Math.abs(down) + ")";
             } else
@@ -298,19 +311,19 @@ class QLearning {
 
             //Left
             context.beginPath();
-            context.moveTo(-3 * w / 8 + widthOffset, -3 * h / 8 + heightOffset);
-            context.lineTo(-3 * w / 8 + widthOffset - w / 8, -3 * h / 8 + heightOffset + h / 8);
-            context.lineTo(-3 * w / 8 + widthOffset - w / 8, -3 * h / 8 + heightOffset - h / 8);
+            context.moveTo(-(numCols - 1) * w / (numCols * 2) + widthOffset, -(numRows - 1) * h / (numRows * 2) + heightOffset);
+            context.lineTo(-(numCols - 1) * w / (numCols * 2) + widthOffset - w / (numCols * 2), -(numRows - 1) * h / (numRows * 2) + heightOffset + h / (numRows * 2));
+            context.lineTo(-(numCols - 1) * w / (numCols * 2) + widthOffset - w / (numCols * 2), -(numRows - 1) * h / (numRows * 2) + heightOffset - h / (numRows * 2));
             if (left > 0) {
                 context.fillStyle = "rgba(65,190,70, " + Math.abs(left) + ")";
             } else
                 context.fillStyle = "rgba(230,73,25, " + Math.abs(left) + ")";
             context.fill();
 
-            this.drawText(up, -3 * w / 8 + widthOffset - 3 * w / 128, -3 * h / 8 + heightOffset - h / 16 - 3 * h / 256)
-            this.drawText(right, -3 * w / 8 + widthOffset + w / 16, -3 * h / 8 + heightOffset)
-            this.drawText(down, -3 * w / 8 + widthOffset - 3 * w / 128, -3 * h / 8 + heightOffset + h / 16 + 3 * h / 128)
-            this.drawText(left, -3 * w / 8 + widthOffset - w / 16 - 3 * w / 64, -3 * h / 8 + heightOffset)
+            this.drawText(up, -(numCols - 1) * w / (numCols * 2) + widthOffset, -(numRows - 1) * h / (numRows * 2) + heightOffset - h / (3 * numRows))
+            this.drawText(right, -(numCols - 1) * w / (numCols * 2) + widthOffset + w / (4 * numCols), -(numRows - 1) * h / (numRows * 2) + heightOffset)
+            this.drawText(down, -(numCols - 1) * w / (numCols * 2) + widthOffset, -(numRows - 1) * h / (numRows * 2) + heightOffset + h / (3 * numRows))
+            this.drawText(left, -(numCols - 1) * w / (numCols * 2) + widthOffset - w / (3 * numCols), -(numRows - 1) * h / (numRows * 2) + heightOffset)
 
         }
     }
@@ -332,7 +345,7 @@ class QLearning {
 
 let options = {
     num_eps: 100,
-    max_steps_per_episode: 10,
+    max_steps_per_episode: numRows*numCols,
     learning_rate: 0.1,
     discount_rate: 0.99,
     exploration_rate: 1,
@@ -347,7 +360,11 @@ let speed = 1;
 let requestId;
 
 function update() {
-    q.step();
+    for(let i = 0; i < speed; i++)
+        q.step();
+    q.setup();
+    episodesSpan.innerHTML = "";
+    episodesSpan.insertAdjacentHTML('beforeend', q.episode);
     requestId = window.requestAnimationFrame(update);
 }
 
@@ -359,6 +376,49 @@ function start() {
     update();
 }
 
+function reset() {
+    q = new QLearning(options);
+}
+
 function step() {
     q.step();
 }
+
+var docRows = document.getElementById("rows")
+var docColumns = document.getElementById("columns")
+
+function changeRow(sign) {
+    if (sign < 0 && numRows > 0)
+        numRows -= 1;
+    else
+        numRows += 1;
+    docRows.innerHTML = "";
+    docRows.insertAdjacentHTML('beforeend', numRows);
+    resizeCanvas(numCols * 100, numRows * 100);
+    reset();
+}
+
+function changeColumn(sign) {
+    if (sign < 0 && numCols > 0)
+        numCols -= 1;
+    else
+        numCols += 1;
+    docColumns.innerHTML = "";
+    docColumns.insertAdjacentHTML('beforeend', numCols);
+    resizeCanvas(numCols * 100, numRows * 100);
+    reset();
+}
+
+var docSpeed = document.getElementById("speed");
+var docSpeedInput = document.getElementById("speedInput");
+var rangePercent = docSpeedInput.value;
+console.log(rangePercent)
+
+function changeSpeed() {
+    rangePercent = docSpeedInput.value;
+    docSpeed.innerHTML = "";
+    docSpeed.insertAdjacentHTML('beforeend', rangePercent);
+    docSpeedInput.style.filter = 'hue-rotate(-' + rangePercent + 'deg)';
+    speed = rangePercent;
+};
+docSpeedInput.addEventListener("input", changeSpeed);

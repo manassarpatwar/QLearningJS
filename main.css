@@ -7,7 +7,7 @@ canvas {
     display: block;
 }
 
-button {
+#buttons button {
     -webkit-transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
     -moz-transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
     -ms-transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
@@ -22,23 +22,17 @@ button {
     box-shadow: rgba(255, 255, 255, 0.4) 0 0px 0px 2px inset;
 }
 
-button:hover {
-    cursor: pointer;
-    color: rgba(255, 255, 255, 0.85);
-    box-shadow: rgba(30, 22, 54, 0.7) 0 0px 0px 40px inset;
-}
-
-button:focus {
+#buttons button:focus {
     outline: 0;
 }
 
-button:hover {
+#buttons button:hover {
     cursor: pointer;
     color: rgba(255, 255, 255, 0.85);
-    box-shadow: rgba(33, 31, 100, 0.7) 0 0px 0px 40px inset;
+    box-shadow: rgba(25, 50, 112, 1) 0 0px 0px 40px inset;
 }
 
-button:active {
+#buttons button:active {
     transform: scale(0.95);
 
 }
@@ -47,6 +41,82 @@ body {
     font-family: Helvetica, sans-serif;
 }
 
-h1 {
+h3 {
     font-weight: 100;
 }
+
+/*Inputs*/
+input[type="number"] {
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
+.number-input {
+    border: 2px solid #ddd;
+    display: inline-flex;
+    margin: 10px 10px;
+}
+
+.number-input,
+.number-input * {
+    box-sizing: border-box;
+}
+
+.number-input button {
+    outline: none;
+    -webkit-appearance: none;
+    border: none;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    margin: 0;
+    position: relative;
+}
+
+.number-input button:before,
+.number-input button:after {
+    display: inline-block;
+    position: absolute;
+    content: '';
+    width: 1rem;
+    height: 2px;
+    background-color: #212121;
+    transform: translate(-50%, -50%);
+}
+
+.number-input button.plus:after {
+    transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.number-input input[type=number] {
+    font-family: sans-serif;
+    max-width: 5rem;
+    padding: .5rem;
+    border: solid #ddd;
+    border-width: 0 2px;
+    font-size: 16px;
+    font-weight: 0;
+    height: 30px;
+    text-align: center;
+}
+
+.size {
+    border-left: 2px solid #ddd;
+    border-right: 2px solid #ddd;
+}
+
+.size p {
+    padding: 0;
+    margin: 0;
+    padding: 18px 15px;
+}
+
+

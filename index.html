@@ -4,6 +4,7 @@
 <head>
     <title></title>
     <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="slider.css">
     <meta name="viewport" content="width=device-width, 
     initial-scale=1, maximum-scale=1" />
 </head>
@@ -11,13 +12,34 @@
 <body>
 
     <main>
-        <button onclick = "start()">Start</button>
-         <button onclick = "stop()">Stop</button>
-         <button onclick = "step()">Step</button>
-        <h1>Action: <span id = "actionSpan"></span></h1>
-         <canvas id="canvas"></canvas>
+        <div id="buttons">
+            <button onclick="start()">Start</button>
+            <button onclick="stop()">Stop</button>
+            <button onclick="step()">Step</button>
+            <button onclick="reset()">Reset</button>
+        </div>
+
+        <div class="number-input">
+            <button onclick="changeRow(-1)"></button>
+            <div class="size">
+                <p>Rows: <span id="rows">4</span></p>
+            </div>
+            <button onclick="changeRow(1)" class="plus"></button>
+        </div>
+        <div class="number-input">
+            <button onclick="changeColumn(-1)"></button>
+            <div class="size">
+                <p>Columns: <span id="columns">4</span></p>
+            </div>
+            <button onclick="changeColumn(1)" class="plus"></button>
+        </div>
+        <h3>Speed: <span id="speed">1</span></h3>
+        <div id = "speedWrapper">
+            <input type="range" value="0" min = "1" id="speedInput">
+        </div>
+        <h3>Action: <span id="actionSpan"></span></h3>
+        <h3>Episodes: <span id="episodesSpan"></span></h3>
+        <canvas id="canvas"></canvas>
     </main>
     <script src="js.js"></script>
-</body>
-
-</html>
+</body></html>
