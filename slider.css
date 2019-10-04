@@ -33,7 +33,6 @@ html input[type="range"]::-webkit-slider-thumb {
     background: #FFF;
     border-radius: 50%;
     position: relative;
-    z-index: 2;
 }
 
 html input[type="range"]::-moz-range-progress {

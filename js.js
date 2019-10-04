@@ -1,7 +1,9 @@
 var canvas = document.getElementById("canvas");
 var actionSpan = document.getElementById("actionSpan");
 var episodesSpan = document.getElementById("episodesSpan");
+var expSpan = document.getElementById("expSpan");
 var context = canvas.getContext("2d");
+
 var w = 0;
 var h = 0;
 
@@ -109,8 +111,11 @@ class QLearning {
             this.state = newState;
         }
         this.steps++;
-        if (this.steps > this.max_steps_per_episode){
+        if (this.steps > this.max_steps_per_episode) {
             this.episode++;
+            this.exploration_rate = this.min_exploration_rate + (this.max_exploration_rate - this.min_exploration_rate) * Math.exp(-this.exploration_decay_rate * this.episode);
+            expSpan.innerHTML = "";
+            expSpan.insertAdjacentHTML('beforeend', Math.floor(this.exploration_rate*getClosestBoardSize())/getClosestBoardSize());
             this.reset();
         }
 
@@ -196,7 +201,6 @@ class QLearning {
         let reward = -0.04;
         if (this.done) {
             this.reset();
-            this.exploration_rate = this.min_exploration_rate + (this.max_exploration_rate - this.min_exploration_rate) * Math.exp(-this.exploration_decay_rate * this.episode);
             this.episode++;
             return null;
         }
@@ -343,15 +347,20 @@ class QLearning {
 
 }
 
+function getClosestBoardSize() {
+    return Math.pow(10, Math.floor(Math.log(numRows * numCols)));
+}
+
+let closestBoardSize = getClosestBoardSize();
 let options = {
     num_eps: 100,
-    max_steps_per_episode: numRows*numCols,
+    max_steps_per_episode: numRows * numCols,
     learning_rate: 0.1,
     discount_rate: 0.99,
     exploration_rate: 1,
     max_exploration_rate: 1,
     min_exploration_rate: 0.01,
-    exploration_decay_rate: 0.01
+    exploration_decay_rate: 1 / closestBoardSize
 }
 
 let q = new QLearning(options)
@@ -360,7 +369,7 @@ let speed = 1;
 let requestId;
 
 function update() {
-    for(let i = 0; i < speed; i++)
+    for (let i = 0; i < speed; i++)
         q.step();
     q.setup();
     episodesSpan.innerHTML = "";
@@ -377,7 +386,9 @@ function start() {
 }
 
 function reset() {
+    options.exploration_decay_rate = 1 / getClosestBoardSize();
     q = new QLearning(options);
+    console.log(q.exploration_decay_rate)
 }
 
 function step() {
@@ -412,7 +423,6 @@ function changeColumn(sign) {
 var docSpeed = document.getElementById("speed");
 var docSpeedInput = document.getElementById("speedInput");
 var rangePercent = docSpeedInput.value;
-console.log(rangePercent)
 
 function changeSpeed() {
     rangePercent = docSpeedInput.value;

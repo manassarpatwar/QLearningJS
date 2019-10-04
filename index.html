@@ -12,33 +12,41 @@
 <body>
 
     <main>
-        <div id="buttons">
-            <button onclick="start()">Start</button>
-            <button onclick="stop()">Stop</button>
-            <button onclick="step()">Step</button>
-            <button onclick="reset()">Reset</button>
-        </div>
-
-        <div class="number-input">
-            <button onclick="changeRow(-1)"></button>
-            <div class="size">
-                <p>Rows: <span id="rows">4</span></p>
+        <div id="info">
+            <div id="buttons">
+                <button class="hover-btns" onclick="start()">Start</button>
+                <button class="hover-btns" onclick="stop()">Stop</button>
+                <button class="hover-btns" onclick="step()">Step</button>
+                <button class="hover-btns" onclick="reset()">Reset</button>
+                <div class="size-wrapper">
+                    <p>Rows:</p>
+                    <div class="number-input">
+                        <button onclick="changeRow(-1)"></button>
+                        <div class="size">
+                            <p id="rows">4</p>
+                        </div>
+                        <button onclick="changeRow(1)" class="plus"></button>
+                    </div>
+                </div>
+                <div class="size-wrapper">
+                    <p>Columns:</p>
+                    <div class="number-input">
+                        <button onclick="changeColumn(-1)"></button>
+                        <div class="size">
+                            <p id="columns">4</p>
+                        </div>
+                        <button onclick="changeColumn(1)" class="plus"></button>
+                    </div>
+                </div>
             </div>
-            <button onclick="changeRow(1)" class="plus"></button>
-        </div>
-        <div class="number-input">
-            <button onclick="changeColumn(-1)"></button>
-            <div class="size">
-                <p>Columns: <span id="columns">4</span></p>
-            </div>
-            <button onclick="changeColumn(1)" class="plus"></button>
         </div>
         <h3>Speed: <span id="speed">1</span></h3>
-        <div id = "speedWrapper">
-            <input type="range" value="0" min = "1" id="speedInput">
+        <div id="speedWrapper">
+            <input type="range" value="0" min="1" id="speedInput">
         </div>
-        <h3>Action: <span id="actionSpan"></span></h3>
-        <h3>Episodes: <span id="episodesSpan"></span></h3>
+        <h3>Action: <span id="actionSpan">None</span></h3>
+        <h3>Episodes: <span id="episodesSpan">0</span></h3>
+        <h3>Exp rate: <span id="expSpan">1</span></h3>
         <canvas id="canvas"></canvas>
     </main>
     <script src="js.js"></script>
